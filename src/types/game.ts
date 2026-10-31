@@ -60,6 +60,7 @@ export interface MenuQuest {
   guestQuote: string;
   guestAvatar: string;
   guestName: string;
+  avatarUrl?: string;
   taskType: 'recommendation' | 'allergen_check' | 'vegetarian' | 'pairing';
   question: string;
   options: {
@@ -86,6 +87,7 @@ export interface CustomerServiceScenario {
   customerName: string;
   customerMood: 'neutral' | 'curious' | 'concerned' | 'unhappy' | 'happy';
   customerQuote: string;
+  avatarUrl?: string;
   context: string;
   options: {
     id: string;

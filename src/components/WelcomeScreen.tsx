@@ -35,19 +35,19 @@ export function WelcomeScreen({ onStart, defaultName = '' }: WelcomeScreenProps)
               Erasmus+ Hospitality & Culinary Arts Training · Lisbon, Portugal
             </div>
 
-            <h1 className="font-serif-lisbon font-bold text-3xl sm:text-5xl text-blue-950 tracking-tight text-balance">
+            <h1 className="font-serif-lisbon font-bold text-2xl sm:text-4xl lg:text-5xl text-blue-950 tracking-tight text-balance">
               Portuguese Food Quest
             </h1>
-            <p className="font-serif-lisbon text-lg sm:text-xl text-amber-800 font-medium">
+            <p className="font-serif-lisbon text-base sm:text-lg lg:text-xl text-amber-800 font-medium">
               Lisbon Restaurant Adventure · CEFR B1 Vocational English
             </p>
-            <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-600 max-w-2xl mx-auto text-xs sm:text-sm lg:text-base leading-relaxed">
               Step into our restaurant overlooking the Tagus River. Complete 5 interactive hospitality missions, master authentic Portuguese gastronomy, learn vital allergen safety, and earn your official Gastronomy Ambassador Certificate!
             </p>
           </div>
 
           {/* Restaurant Manager Welcome Message */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-5 flex items-start gap-4">
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3.5 sm:gap-4">
             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-amber-600 shrink-0 shadow-sm bg-amber-100">
               <img
                 src="/assets/aistudio/manager_bernardo_26cd4c18.png"
@@ -55,8 +55,8 @@ export function WelcomeScreen({ onStart, defaultName = '' }: WelcomeScreenProps)
                 className="w-full h-full object-cover object-top"
               />
             </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
+            <div className="space-y-1.5 flex-1">
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-2">
                 <span className="font-serif-lisbon font-bold text-blue-950 text-base">
                   Manager Bernardo
                 </span>
@@ -64,14 +64,14 @@ export function WelcomeScreen({ onStart, defaultName = '' }: WelcomeScreenProps)
                   Restaurante Miradouro do Tejo · Alfama, Lisboa
                 </span>
               </div>
-              <p className="text-slate-800 text-sm italic leading-relaxed">
+              <p className="text-slate-800 text-xs sm:text-sm italic leading-relaxed">
                 “Bem-vindo a Lisboa! Today is your first day at our Portuguese restaurant. Are you ready to discover Portuguese cuisine, navigate Lisbon fresh markets, and serve our international guests with professional English hospitality?”
               </p>
             </div>
           </div>
 
           {/* 5 Missions Roadmap Preview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 pt-2">
             <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/80 space-y-1">
               <div className="flex items-center gap-2 text-blue-800 text-xs font-bold uppercase tracking-wider">
                 <Compass className="w-4 h-4 text-blue-600" />

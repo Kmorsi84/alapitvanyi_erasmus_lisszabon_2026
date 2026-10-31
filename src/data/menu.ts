@@ -181,11 +181,12 @@ export const RESTAURANT_MENU: MenuItem[] = [
 export const MENU_QUESTS: MenuQuest[] = [
   {
     id: 'quest-fish',
-    guestName: 'Elena from Berlin',
-    guestAvatar: '👩‍💼',
+    guestName: 'Anna from Sweden',
+    guestAvatar: '👱‍♀️',
+    avatarUrl: '/assets/aistudio/guest_anna_portrait.jpg',
     guestQuote: 'Good evening! It is my first trip to Portugal. I would love to try an authentic, traditional Portuguese fish dish. What do you recommend?',
     taskType: 'recommendation',
-    question: 'Choose the most professional recommendation for Elena:',
+    question: 'Choose the most professional recommendation for Anna:',
     options: [
       {
         id: 'opt-1',

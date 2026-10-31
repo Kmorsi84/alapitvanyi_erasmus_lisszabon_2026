@@ -156,13 +156,13 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 items-start">
           {/* Photos Column */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Select Dish Photograph:
+          <div className="space-y-2 sm:space-y-3">
+            <h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700">
+              1. Dish Photograph:
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
               {photoCards.map((dish) => {
                 const isMatched = matchedIds.includes(dish.id);
                 const isSelected = selectedPhotoId === dish.id;
@@ -171,7 +171,7 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
                   <div
                     key={`photo-${dish.id}`}
                     onClick={() => handleSelectPhoto(dish.id)}
-                    className={`relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all h-28 ${
+                    className={`relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all h-20 sm:h-28 isolate clip-fix ${
                       isMatched
                         ? 'border-emerald-500 opacity-60 cursor-default ring-2 ring-emerald-300'
                         : isSelected
@@ -187,7 +187,7 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
                     />
                     {isMatched && (
                       <div className="absolute inset-0 bg-emerald-950/40 flex items-center justify-center">
-                        <CheckCircle2 className="w-8 h-8 text-white drop-shadow-md" />
+                        <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 text-white drop-shadow-md" />
                       </div>
                     )}
                   </div>
@@ -197,11 +197,11 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
           </div>
 
           {/* Names Column */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Select Portuguese Name:
+          <div className="space-y-2 sm:space-y-3">
+            <h3 className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700">
+              2. Portuguese Name:
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
               {nameCards.map((dish) => {
                 const isMatched = matchedIds.includes(dish.id);
                 const isSelected = selectedNameId === dish.id;
@@ -211,7 +211,7 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
                     key={`name-${dish.id}`}
                     onClick={() => handleSelectName(dish.id)}
                     disabled={isMatched}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                    className={`p-2 sm:p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-1.5 sm:gap-2 h-20 sm:h-auto ${
                       isMatched
                         ? 'bg-emerald-50 border-emerald-400 text-emerald-900 font-semibold cursor-default'
                         : isSelected
@@ -219,11 +219,11 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
                         : 'bg-slate-50 border-slate-200 hover:border-blue-400 text-slate-800'
                     }`}
                   >
-                    <div>
-                      <span className="font-serif-lisbon font-bold text-sm block">
+                    <div className="min-w-0">
+                      <span className="font-serif-lisbon font-bold text-xs sm:text-sm block truncate">
                         {dish.portugueseName}
                       </span>
-                      <span className="text-[11px] text-amber-800 italic block line-clamp-1">
+                      <span className="text-[10px] sm:text-[11px] text-amber-800 italic block line-clamp-1">
                         {dish.englishName}
                       </span>
                     </div>

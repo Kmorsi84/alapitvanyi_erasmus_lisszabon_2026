@@ -114,7 +114,7 @@ export function Mission1Vocabulary({ onComplete, soundEnabled }: Mission1Props) 
               aria-label={`Vocabulary card for ${dish.portugueseName}`}
             >
               <div
-                className={`relative w-full h-[400px] rounded-xl transition-all duration-500 transform-style-3d shadow-sm hover:shadow-md border ${
+                className={`relative w-full h-[385px] sm:h-[400px] rounded-xl transition-all duration-500 transform-style-3d shadow-sm hover:shadow-md border ${
                   hasBeenExplored ? 'border-blue-300' : 'border-slate-200'
                 } bg-white flex flex-col`}
               >
@@ -122,7 +122,7 @@ export function Mission1Vocabulary({ onComplete, soundEnabled }: Mission1Props) 
                   /* FRONT OF CARD */
                   <div className="flex flex-col h-full overflow-hidden rounded-xl">
                     {/* Realistic Food Photography */}
-                    <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-100 isolate clip-fix">
                       <FoodImage
                         src={dish.imageUrl}
                         alt={dish.portugueseName}
@@ -134,7 +134,7 @@ export function Mission1Vocabulary({ onComplete, soundEnabled }: Mission1Props) 
                           onClick={(e) =>
                             handlePlayPronunciation(e, dish.portugueseName, dish.exampleSentence)
                           }
-                          className="p-1.5 rounded-full bg-white/90 hover:bg-white text-blue-900 shadow-sm border border-blue-100 transition-transform active:scale-90"
+                          className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-white/95 hover:bg-white text-blue-900 shadow-sm border border-blue-200 flex items-center justify-center transition-transform active:scale-90 cursor-pointer"
                           title="Listen to Portuguese pronunciation & English sentence"
                           aria-label={`Play audio pronunciation for ${dish.portugueseName}`}
                         >

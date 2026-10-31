@@ -86,34 +86,34 @@ export function Mission4Service({ onComplete, onRecordMistake }: Mission4Props) 
       {/* Role-Play Stage Container */}
       <div className="bg-white rounded-2xl border border-blue-200/90 shadow-md overflow-hidden">
         {/* Restaurant Dining Room Background & Atmosphere Header */}
-        <div className="relative bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 p-6 sm:p-8 text-white min-h-[220px] flex flex-col justify-between overflow-hidden">
+        <div className="relative bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 p-4 sm:p-6 lg:p-8 text-white flex flex-col justify-between overflow-hidden">
           {/* Subtle Tagus River & Table ambiance backdrop */}
           <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:20px_20px] opacity-10" />
 
           {/* Top Bar: Situation Tracker & Mood Indicator */}
-          <div className="relative z-10 flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-white/10">
+          <div className="relative z-10 flex items-center justify-between flex-wrap gap-2 pb-3 sm:pb-4 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-300 text-xs font-semibold uppercase tracking-wider border border-blue-400/30">
+              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-blue-500/20 text-blue-300 text-[11px] sm:text-xs font-semibold uppercase tracking-wider border border-blue-400/30">
                 Table Role-Play {currentIndex + 1} of {activeScenarios.length}
               </span>
-              <span className="text-xs text-slate-300 capitalize">
-                Situation: {currentScenario.situationType.replace(/_/g, ' ')}
+              <span className="text-[11px] sm:text-xs text-slate-300 capitalize truncate max-w-[150px] sm:max-w-none">
+                {currentScenario.situationType.replace(/_/g, ' ')}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-md">
-                Service Score: {totalScore} / 50 pts
+              <span className="text-xs font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-md">
+                Service: {totalScore} / 50 pts
               </span>
             </div>
           </div>
 
           {/* Customer at the Table Simulation */}
-          <div className="relative z-10 flex items-start gap-4 sm:gap-6 pt-4">
+          <div className="relative z-10 flex items-start gap-3 sm:gap-6 pt-3 sm:pt-4">
             {/* Customer Character Avatar with Reaction Mood */}
             <div className="relative shrink-0 flex flex-col items-center">
               <div
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl shadow-lg flex items-center justify-center text-3xl sm:text-4xl transition-all duration-300 border-2 ${
+                className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center transition-all duration-300 border-2 overflow-hidden relative ${
                   customerMood === 'happy'
                     ? 'bg-emerald-100 border-emerald-400 ring-4 ring-emerald-300/40 scale-105'
                     : customerMood === 'unhappy'
@@ -121,29 +121,52 @@ export function Mission4Service({ onComplete, onRecordMistake }: Mission4Props) 
                     : 'bg-amber-100 border-amber-300'
                 }`}
               >
-                {customerMood === 'happy'
-                  ? '😊'
-                  : customerMood === 'unhappy'
-                  ? '😟'
-                  : currentScenario.customerMood === 'unhappy'
-                  ? '😠'
-                  : '🧑‍💼'}
+                {currentScenario.avatarUrl ? (
+                  <img
+                    src={currentScenario.avatarUrl}
+                    alt={currentScenario.customerName}
+                    className="w-full h-full object-cover object-top"
+                  />
+                ) : (
+                  <span className="text-2xl sm:text-3xl md:text-4xl">
+                    {customerMood === 'happy'
+                      ? '😊'
+                      : customerMood === 'unhappy'
+                      ? '😟'
+                      : currentScenario.customerMood === 'unhappy'
+                      ? '😠'
+                      : '🧑‍💼'}
+                  </span>
+                )}
               </div>
 
-              <span className="text-[11px] font-semibold text-slate-200 mt-1.5 text-center line-clamp-1 max-w-[100px]">
+              {/* Mood reaction badge when photo is displayed */}
+              {currentScenario.avatarUrl && (
+                <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-xs">
+                  {customerMood === 'happy'
+                    ? '😊'
+                    : customerMood === 'unhappy'
+                    ? '😟'
+                    : currentScenario.customerMood === 'unhappy'
+                    ? '😠'
+                    : '💬'}
+                </span>
+              )}
+
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-200 mt-1 text-center line-clamp-1 max-w-[80px] sm:max-w-[100px]">
                 {currentScenario.customerName}
               </span>
             </div>
 
             {/* Customer Speech Bubble */}
-            <div className="flex-1 relative bg-white text-slate-900 rounded-2xl p-4 sm:p-5 shadow-xl border border-blue-100 space-y-2">
+            <div className="flex-1 relative bg-white text-slate-900 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-xl border border-blue-100 space-y-1.5 sm:space-y-2">
               <div className="flex items-center justify-between text-xs text-slate-500">
                 <span className="font-semibold text-blue-900">
                   {currentScenario.customerName}
                 </span>
-                <span className="italic">{currentScenario.context}</span>
+                <span className="italic text-[11px] sm:text-xs">{currentScenario.context}</span>
               </div>
-              <p className="text-base sm:text-lg font-serif-lisbon text-blue-950 font-bold leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg font-serif-lisbon text-blue-950 font-bold leading-relaxed">
                 "{currentScenario.customerQuote}"
               </p>
             </div>

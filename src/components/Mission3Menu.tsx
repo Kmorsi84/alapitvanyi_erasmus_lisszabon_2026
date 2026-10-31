@@ -19,6 +19,7 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
   }, []);
 
   const [activeTab, setActiveTab] = useState<'all' | 'starter' | 'soup' | 'main' | 'dessert' | 'drink'>('all');
+  const [mobileTab, setMobileTab] = useState<'both' | 'inquiry' | 'menu'>('both');
   const [currentQuestIndex, setCurrentQuestIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, { isCorrect: boolean; explanation: string }>>({});
@@ -66,6 +67,10 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
       setCurrentQuestIndex((prev) => prev + 1);
       setSelectedOptionId(null);
       setShowExplanation(false);
+      // Auto-switch back to inquiry if user was viewing menu on mobile
+      if (mobileTab === 'menu') {
+        setMobileTab('inquiry');
+      }
     } else {
       onComplete(score);
     }
@@ -82,24 +87,92 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
         subtext="Professional hospitality phrases: 'May I recommend...?', 'This dish is made with...', 'Let me check with the chef.'"
       />
 
+      {/* Mobile-Friendly Screen Switcher */}
+      <div className="lg:hidden flex items-center justify-between bg-white border border-blue-200 p-2 rounded-xl shadow-xs gap-1.5 text-xs font-semibold">
+        <span className="text-[11px] text-slate-500 uppercase tracking-wide pl-1 font-bold">
+          View Mode:
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMobileTab('inquiry')}
+            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              mobileTab === 'inquiry'
+                ? 'bg-blue-900 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            💬 Guest Inquiry
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab('menu')}
+            className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              mobileTab === 'menu'
+                ? 'bg-amber-500 text-blue-950 font-bold shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            📜 Menu & Allergens
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab('both')}
+            className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              mobileTab === 'both'
+                ? 'bg-slate-200 text-slate-900 font-bold'
+                : 'text-slate-500 hover:bg-slate-100'
+            }`}
+          >
+            📑 Both
+          </button>
+        </div>
+      </div>
+
       {/* Main Split: Guest Request vs Interactive Menu */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Customer Quest Box (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-xl border border-blue-200 p-5 shadow-sm space-y-5 sticky top-20">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div
+          id="customer-inquiry"
+          className={`lg:col-span-5 bg-white rounded-xl border border-blue-200 p-4 sm:p-5 shadow-sm space-y-4 sm:space-y-5 lg:sticky lg:top-20 relative z-10 isolate ${
+            mobileTab === 'menu' ? 'hidden lg:block' : 'block'
+          }`}
+        >
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-amber-500" />
               Customer Inquiry {currentQuestIndex + 1} of {quests.length}
             </span>
-            <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded-md">
-              Score: {score} / 30 pts
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded-md">
+                Score: {score} / 30 pts
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileTab('menu');
+                  const el = document.getElementById('restaurant-menu');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="lg:hidden text-xs text-blue-700 hover:text-blue-900 font-semibold bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md border border-blue-200 transition-colors cursor-pointer"
+              >
+                📜 Menu ↓
+              </button>
+            </div>
           </div>
 
           {/* Guest Dialogue Bubble */}
           <div className="flex items-start gap-3.5 p-4 rounded-xl bg-gradient-to-r from-amber-50/70 to-orange-50/50 border border-amber-200/80">
-            <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-amber-300 flex items-center justify-center text-2xl shrink-0">
-              {currentQuest.guestAvatar}
+            <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-amber-300 flex items-center justify-center text-2xl shrink-0 overflow-hidden">
+              {currentQuest.avatarUrl ? (
+                <img
+                  src={currentQuest.avatarUrl}
+                  alt={currentQuest.guestName}
+                  className="w-full h-full object-cover object-top"
+                />
+              ) : (
+                currentQuest.guestAvatar
+              )}
             </div>
             <div className="space-y-1">
               <span className="font-serif-lisbon font-bold text-sm text-blue-950 block">
@@ -210,7 +283,12 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
         </div>
 
         {/* Right Column: Restaurant Menu Display (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-xl border border-blue-200/90 shadow-sm overflow-hidden flex flex-col">
+        <div
+          id="restaurant-menu"
+          className={`lg:col-span-7 bg-white rounded-xl border border-blue-200/90 shadow-sm overflow-hidden flex-col relative z-0 isolate ${
+            mobileTab === 'inquiry' ? 'hidden lg:flex' : 'flex'
+          }`}
+        >
           {/* Menu Header with Azulejo Border Motif */}
           <div className="p-4 sm:p-5 bg-gradient-to-r from-blue-950 via-blue-900 to-slate-900 text-white border-b border-blue-800">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -218,17 +296,30 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
                 <span className="text-[11px] font-semibold text-amber-300 uppercase tracking-widest block">
                   Restaurante Miradouro do Tejo · Lisboa
                 </span>
-                <h3 className="font-serif-lisbon font-bold text-xl sm:text-2xl text-white">
+                <h3 className="font-serif-lisbon font-bold text-lg sm:text-2xl text-white">
                   Menu Gastronómico
                 </h3>
               </div>
-              <div className="text-right">
-                <span className="text-[11px] text-blue-200 italic block">
-                  *Fictional Educational Prices
-                </span>
-                <span className="text-xs text-amber-300 font-medium">
-                  Verified EU Allergens Listed
-                </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileTab('inquiry');
+                    const el = document.getElementById('customer-inquiry');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="lg:hidden text-xs bg-amber-400 hover:bg-amber-300 text-blue-950 font-bold px-2.5 py-1 rounded-md shadow-xs transition-colors cursor-pointer"
+                >
+                  💬 Back to Inquiry ↑
+                </button>
+                <div className="text-right hidden sm:block">
+                  <span className="text-[11px] text-blue-200 italic block">
+                    *Fictional Educational Prices
+                  </span>
+                  <span className="text-xs text-amber-300 font-medium">
+                    Verified EU Allergens Listed
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -257,14 +348,19 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
             </div>
           </div>
 
-          {/* Menu Items List */}
-          <div className="p-4 sm:p-5 space-y-4 max-h-[640px] overflow-y-auto">
+          {/* Menu Items List - No nested scroll trap on mobile, smooth isolated clipping on all devices */}
+          <div className="p-4 sm:p-5 space-y-4 lg:max-h-[680px] lg:overflow-y-auto overflow-visible touch-scroll">
             {filteredMenuItems.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-slate-50/50 hover:bg-white transition-all shadow-2xs"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-slate-50/50 hover:bg-white transition-colors duration-150 shadow-2xs relative isolate"
               >
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100">
+                <div
+                  className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100 isolate clip-fix"
+                  style={{
+                    WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+                  }}
+                >
                   <FoodImage
                     src={item.imageUrl}
                     alt={item.portugueseName}

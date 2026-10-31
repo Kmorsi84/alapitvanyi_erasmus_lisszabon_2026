@@ -71,21 +71,30 @@ export function FoodImage({
   }
 
   return (
-    <div className={`relative overflow-hidden bg-slate-100 ${className}`}>
+    <div
+      className={`relative overflow-hidden bg-slate-100 isolate ${className}`}
+      style={{
+        WebkitBackfaceVisibility: 'hidden',
+        backfaceVisibility: 'hidden',
+        WebkitTransform: 'translate3d(0, 0, 0)',
+        transform: 'translate3d(0, 0, 0)',
+        WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+      }}
+    >
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 animate-pulse">
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
           <Utensils className="w-6 h-6 text-slate-300" />
         </div>
       )}
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         referrerPolicy="no-referrer"
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="w-full h-full object-cover block"
       />
     </div>
   );

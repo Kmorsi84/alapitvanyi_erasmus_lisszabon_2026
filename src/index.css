@@ -1,15 +1,47 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     color: #1e293b;
     background-color: #f8fafc;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   h1, h2, h3, .font-serif-lisbon {
     font-family: 'Cinzel', Georgia, serif;
   }
+}
+
+/* Smooth touch momentum scrolling on iOS and mobile */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix iOS Safari overflow clipping and compositor detachment bug */
+.clip-fix {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  isolation: isolate;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Azulejo pattern backgrounds */

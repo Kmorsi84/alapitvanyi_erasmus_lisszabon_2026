@@ -6,6 +6,7 @@ export const SERVICE_SCENARIOS: CustomerServiceScenario[] = [
     situationType: 'complaint_handling',
     customerName: 'Mr. Davies (Table 4)',
     customerMood: 'unhappy',
+    avatarUrl: '/assets/aistudio/guest_mr_davies.jpg',
     context: 'The guest gestures to their plate with a frown.',
     customerQuote: 'Excuse me, waiter. I just took a bite and my piri-piri chicken is lukewarm and cold in the middle.',
     options: [
@@ -108,6 +109,7 @@ export const SERVICE_SCENARIOS: CustomerServiceScenario[] = [
     situationType: 'explaining_dish',
     customerName: 'Anna from Sweden (Table 6)',
     customerMood: 'curious',
+    avatarUrl: '/assets/aistudio/guest_anna_portrait.jpg',
     context: 'The guest points to the menu with curiosity.',
     customerQuote: 'Could you explain what "Bacalhau à Brás" is? I saw it on the menu, but I am not familiar with Portuguese cod.',
     options: [
@@ -176,6 +178,7 @@ export const SERVICE_SCENARIOS: CustomerServiceScenario[] = [
     situationType: 'taking_order',
     customerName: 'A solo business traveler (Table 3)',
     customerMood: 'neutral',
+    avatarUrl: '/assets/aistudio/guest_mr_davies.jpg',
     context: 'The guest has closed the menu and has their credit card ready.',
     customerQuote: 'I am ready to order: I’ll have the grilled sardines, a side green salad, and a glass of dry white wine, please.',
     options: [
@@ -210,6 +213,7 @@ export const SERVICE_SCENARIOS: CustomerServiceScenario[] = [
     situationType: 'allergy_inquiry',
     customerName: 'Mrs. Kovács (Table 5)',
     customerMood: 'concerned',
+    avatarUrl: '/assets/aistudio/guest_elena.jpg',
     context: 'The customer shows an allergy alert card in English.',
     customerQuote: 'I have a life-threatening nut allergy. Does your sauce for the roast pork contain any crushed pine nuts or almonds?',
     options: [
