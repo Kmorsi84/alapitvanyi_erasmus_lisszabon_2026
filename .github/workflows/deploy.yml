@@ -1,6 +1,8 @@
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
 
-name: Publish Portuguese Food Quest
-
+    - name: Build application
+      run: npm run build
 on:
   push:
     branches: [main]
