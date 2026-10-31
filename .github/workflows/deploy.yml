@@ -18,6 +18,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,6 +34,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+
+      - name: Fix image paths for GitHub Pages
+        run: |
+          grep -rlZ '/assets/aistudio/' src |
+            xargs -0 -r sed -i 's|/assets/aistudio/|/alapitvanyi_erasmus_lisszabon_2026/assets/aistudio/|g'
 
       - name: Build application
         run: npm run build
