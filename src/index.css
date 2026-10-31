@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    background-color: #f8fafc;
+  }
+
+  h1, h2, h3, .font-serif-lisbon {
+    font-family: 'Cinzel', Georgia, serif;
+  }
+}
+
+/* Azulejo pattern backgrounds */
+.bg-azulejo {
+  background-color: #ffffff;
+  background-image: radial-gradient(#1e40af 0.75px, transparent 0.75px), radial-gradient(#3b82f6 0.75px, #ffffff 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+.bg-azulejo-border {
+  border-image: repeating-linear-gradient(45deg, #1e40af, #1e40af 10px, #ffffff 10px, #ffffff 20px, #0284c7 20px, #0284c7 30px) 10;
+}
+
+/* Printable Certificate styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .certificate-container {
+    box-shadow: none !important;
+    border: 8px double #1e3a8a !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+    margin: 0 !important;
+    padding: 2.5rem !important;
+  }
+}

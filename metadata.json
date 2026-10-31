@@ -1,0 +1,6 @@
+{
+  "name": "Portuguese Food Quest – Lisbon Restaurant Adventure",
+  "description": "Interactive educational restaurant adventure in Lisbon for hospitality students. Master Portuguese gastronomy, ingredients, menu reading, and CEFR B1 customer service.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
