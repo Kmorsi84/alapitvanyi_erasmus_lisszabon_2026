@@ -151,13 +151,21 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-md">
                 Need: {requiredCount} ingredients
               </span>
               <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-900 border border-blue-200 rounded-md">
                 In Basket: {basket.length}
               </span>
+              {basket.some((id) => currentChallenge.requiredIngredientIds.includes(id)) && (
+                <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md flex items-center gap-1">
+                  <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
+                  <span>
+                    Correct: {basket.filter((id) => currentChallenge.requiredIngredientIds.includes(id)).length}/{requiredCount}
+                  </span>
+                </span>
+              )}
             </div>
           </div>
 
@@ -217,15 +225,35 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
                 {basket.map((id) => {
                   const ing = MARKET_INGREDIENTS.find((i) => i.id === id);
                   if (!ing) return null;
+                  const isRequired = currentChallenge.requiredIngredientIds.includes(id);
                   return (
                     <div
                       key={id}
-                      className="flex items-center justify-between p-2 rounded-md bg-white border border-amber-200 text-xs shadow-2xs"
+                      className={`flex items-center justify-between p-2 rounded-md border text-xs shadow-2xs transition-all ${
+                        isRequired
+                          ? 'bg-emerald-50/90 border-emerald-400 text-emerald-950 ring-1 ring-emerald-300/60'
+                          : 'bg-white border-amber-200 text-slate-800'
+                      }`}
                     >
-                      <span className="font-semibold text-slate-800">{ing.name}</span>
-                      <span className="text-[11px] text-amber-800 italic">
-                        {ing.portugueseName}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 ${
+                            isRequired ? 'bg-emerald-500 ring-2 ring-emerald-200' : 'bg-amber-400'
+                          }`}
+                        />
+                        <span className="font-semibold truncate">{ing.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                        <span className="text-[11px] text-amber-800 italic">
+                          {ing.portugueseName}
+                        </span>
+                        {isRequired && (
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                            <Check className="w-2.5 h-2.5 stroke-[3]" />
+                            <span>Correct</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -269,7 +297,7 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
             Mercado da Ribeira Market Stalls
           </h2>
           <span className="text-xs text-slate-500">
-            Click an ingredient to add or remove it from your basket
+            Click ingredients to add to basket. Correct ingredients turn <span className="text-emerald-700 font-bold">green</span> immediately!
           </span>
         </div>
 
@@ -277,18 +305,22 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
           {MARKET_INGREDIENTS.map((item) => {
             const inBasket = basket.includes(item.id);
             const isCompletedCurrent = completedChallenges.includes(challengeIndex);
-            const isCorrectAnswer =
-              isCompletedCurrent && currentChallenge.requiredIngredientIds.includes(item.id);
+            const isRequired = currentChallenge.requiredIngredientIds.includes(item.id);
+            // Highlight in green immediately when picked if it's a correct hit, or if challenge is completed
+            const isCorrectSelection = (inBasket && isRequired) || (isCompletedCurrent && isRequired);
+            const isWrongSelection = inBasket && !isRequired;
 
             return (
               <div
                 key={item.id}
                 onClick={() => handleToggleIngredient(item.id)}
-                className={`group relative rounded-xl border p-2 flex flex-col justify-between cursor-pointer transition-all select-none ${
-                  inBasket
+                className={`group relative rounded-xl border-2 p-2 flex flex-col justify-between cursor-pointer transition-all select-none ${
+                  isCorrectSelection
+                    ? 'bg-emerald-50/95 border-emerald-500 ring-2 ring-emerald-400/80 shadow-md scale-102'
+                    : isWrongSelection
                     ? 'bg-amber-50/90 border-amber-500 ring-2 ring-amber-400/50 shadow-md scale-102'
-                    : 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-sm'
-                } ${isCorrectAnswer ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-400' : ''}`}
+                    : 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-xs'
+                }`}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -305,21 +337,44 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
                     category={item.category}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
-                  {inBasket && (
-                    <div className="absolute top-1.5 right-1.5 bg-amber-500 text-blue-950 rounded-full p-1 shadow-xs">
+                  {isCorrectSelection && (
+                    <>
+                      <div className="absolute top-1.5 right-1.5 bg-emerald-600 text-white rounded-full p-1 shadow-md flex items-center justify-center animate-in zoom-in-50 duration-200">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      </div>
+                      <div className="absolute bottom-1.5 left-1.5 bg-emerald-700/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs backdrop-blur-xs flex items-center gap-0.5">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <span>Helyes!</span>
+                      </div>
+                    </>
+                  )}
+                  {isWrongSelection && (
+                    <div className="absolute top-1.5 right-1.5 bg-amber-500 text-white rounded-full p-1 shadow-xs flex items-center justify-center">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-0.5 text-center">
-                  <h3 className="font-serif-lisbon font-bold text-xs text-slate-900 group-hover:text-blue-900 line-clamp-1">
+                  <h3
+                    className={`font-serif-lisbon font-bold text-xs line-clamp-1 ${
+                      isCorrectSelection
+                        ? 'text-emerald-950 font-extrabold'
+                        : 'text-slate-900 group-hover:text-blue-900'
+                    }`}
+                  >
                     {item.name}
                   </h3>
                   <p className="text-[11px] text-amber-800 italic line-clamp-1">
                     {item.portugueseName}
                   </p>
-                  <span className="inline-block text-[10px] text-slate-400 capitalize">
+                  <span
+                    className={`inline-block text-[10px] capitalize ${
+                      isCorrectSelection
+                        ? 'text-emerald-700 font-bold'
+                        : 'text-slate-400'
+                    }`}
+                  >
                     {item.category}
                   </span>
                 </div>
@@ -359,8 +414,13 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
             <p className="text-xs font-bold text-blue-950 truncate">
               {currentChallenge.dishName}
             </p>
-            <p className="text-[10px] text-amber-800 font-semibold">
-              Basket: {basket.length}/{requiredCount} items
+            <p className="text-[10px] text-amber-800 font-semibold flex items-center gap-1">
+              <span>Basket: {basket.length}/{requiredCount}</span>
+              {basket.some((id) => currentChallenge.requiredIngredientIds.includes(id)) && (
+                <span className="text-emerald-700 font-bold bg-emerald-100/80 px-1 rounded text-[9px]">
+                  ✓ {basket.filter((id) => currentChallenge.requiredIngredientIds.includes(id)).length} találat
+                </span>
+              )}
             </p>
           </div>
         </div>
