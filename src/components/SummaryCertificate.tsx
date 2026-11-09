@@ -5,6 +5,10 @@ import { Badge } from '../types/game';
 
 interface SummaryCertificateProps {
   studentName: string;
+  studentDetails?: {
+    className?: string | null;
+    profession?: string | null;
+  } | null;
   totalScore: number;
   missionScores: {
     m1: number;
@@ -20,6 +24,7 @@ interface SummaryCertificateProps {
 
 export function SummaryCertificate({
   studentName,
+  studentDetails,
   totalScore,
   missionScores,
   badges,
@@ -282,6 +287,12 @@ export function SummaryCertificate({
             <div className="text-2xl sm:text-4xl md:text-5xl font-serif-lisbon font-bold text-blue-900 py-1 border-b-2 border-amber-400 inline-block px-4 sm:px-8 max-w-full truncate">
               {studentName}
             </div>
+
+            {(studentDetails?.className || studentDetails?.profession) && (
+              <p className="text-xs sm:text-sm font-semibold text-amber-900 tracking-wide">
+                {[studentDetails?.className, studentDetails?.profession].filter(Boolean).join(' · ')}
+              </p>
+            )}
 
             <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed max-w-2xl mx-auto pt-1 sm:pt-2">
               for successfully completing the 15-minute vocational simulation in Lisbon, Portugal, demonstrating CEFR B1 professional English proficiency in Portuguese gastronomy, ingredients, customer service, and allergen safety.

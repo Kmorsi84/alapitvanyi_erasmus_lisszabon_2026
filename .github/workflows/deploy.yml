@@ -41,6 +41,9 @@ jobs:
             xargs -0 -r sed -i 's|/assets/aistudio/|/alapitvanyi_erasmus_lisszabon_2026/assets/aistudio/|g'
 
       - name: Build application
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://xgdogmcqktqcqgqrxpxt.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY || '' }}
         run: npm run build
 
       - name: Configure GitHub Pages

@@ -1,4 +1,14 @@
-import { Clock, Volume2, VolumeX, Award, RotateCcw } from 'lucide-react';
+import {
+  Clock,
+  Volume2,
+  VolumeX,
+  Award,
+  RotateCcw,
+  LogOut,
+  GraduationCap,
+  Cloud,
+  Loader2,
+} from 'lucide-react';
 import { MissionId } from '../types/game';
 
 interface NavbarProps {
@@ -8,7 +18,17 @@ interface NavbarProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   studentName: string;
+  studentDetails?: {
+    className?: string | null;
+    profession?: string | null;
+  } | null;
+  isLoggedIn?: boolean;
+  isTeacher?: boolean;
+  isSaving?: boolean;
   onRestart: () => void;
+  onLogout?: () => void;
+  onOpenTeacherLogin?: () => void;
+  onToggleTeacherView?: () => void;
 }
 
 export function Navbar({
@@ -18,7 +38,14 @@ export function Navbar({
   soundEnabled,
   onToggleSound,
   studentName,
+  studentDetails,
+  isLoggedIn = false,
+  isTeacher = false,
+  isSaving = false,
   onRestart,
+  onLogout,
+  onOpenTeacherLogin,
+  onToggleTeacherView,
 }: NavbarProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -60,13 +87,42 @@ export function Navbar({
               PFQ
             </div>
             <div className="min-w-0">
-              <h1 className="font-serif-lisbon font-bold text-blue-950 text-xs sm:text-base leading-tight tracking-tight truncate">
-                Portuguese Food Quest
-              </h1>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h1 className="font-serif-lisbon font-bold text-blue-950 text-xs sm:text-base leading-tight tracking-tight truncate">
+                  Portuguese Food Quest
+                </h1>
+                {isLoggedIn && (
+                  <span
+                    className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200"
+                    title={isSaving ? 'Supabase mentés folyamatban...' : 'Supabase-hez csatlakoztatva'}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-2.5 h-2.5 animate-spin text-amber-600" />
+                        <span>Mentés...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Cloud className="w-2.5 h-2.5 text-emerald-600" />
+                        <span>Supabase</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+
               <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">
                 <span className="hidden sm:inline">Lisbon Restaurant Adventure · </span>
                 {studentName ? (
-                  <span>Trainee: <strong className="text-blue-900">{studentName}</strong></span>
+                  <span>
+                    Tanuló: <strong className="text-blue-900">{studentName}</strong>
+                    {studentDetails?.className && (
+                      <span className="text-slate-400"> ({studentDetails.className}</span>
+                    )}
+                    {studentDetails?.profession && (
+                      <span className="text-slate-400"> · {studentDetails.profession})</span>
+                    )}
+                  </span>
                 ) : (
                   <span>Lisbon Training</span>
                 )}
@@ -84,8 +140,8 @@ export function Navbar({
             </span>
           </div>
 
-          {/* Gamification Stats: Timer, Score, Sound, Restart */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Gamification Stats: Timer, Score, Sound, Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Timer */}
             <div
               className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-xs sm:text-sm font-semibold ${
@@ -115,8 +171,8 @@ export function Navbar({
             <button
               onClick={onToggleSound}
               className="p-1.5 sm:p-2 text-slate-600 hover:text-blue-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer active:scale-95"
-              title={soundEnabled ? 'Speech audio enabled' : 'Speech audio muted'}
-              aria-label={soundEnabled ? 'Mute speech audio' : 'Enable speech audio'}
+              title={soundEnabled ? 'Hang engedélyezve' : 'Hang némítva'}
+              aria-label={soundEnabled ? 'Hang némítása' : 'Hang bekapcsolása'}
             >
               {soundEnabled ? (
                 <Volume2 className="w-4 h-4 text-blue-800" />
@@ -125,15 +181,48 @@ export function Navbar({
               )}
             </button>
 
+            {/* Teacher button */}
+            {isTeacher ? (
+              <button
+                onClick={onToggleTeacherView}
+                className="px-2 py-1 text-xs font-semibold bg-amber-100 text-amber-950 hover:bg-amber-200 border border-amber-300 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                title="Tanári felület megnyitása"
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-amber-800" />
+                <span className="hidden sm:inline">Tanári Nézet</span>
+              </button>
+            ) : onOpenTeacherLogin ? (
+              <button
+                onClick={onOpenTeacherLogin}
+                className="p-1.5 sm:px-2 sm:py-1 text-xs font-medium text-blue-950 hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                title="Tanári belépés"
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-blue-800" />
+                <span className="hidden lg:inline">Tanár</span>
+              </button>
+            ) : null}
+
             {/* Restart button */}
             {currentMission > 0 && (
               <button
                 onClick={onRestart}
-                className="p-1.5 sm:px-2.5 sm:py-1 text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
-                title="Restart adventure from the beginning"
+                className="p-1.5 sm:px-2 sm:py-1 text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 border border-slate-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
+                title="Újrakezdés az elejétől"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Restart</span>
+                <span className="hidden lg:inline">Újra</span>
+              </button>
+            )}
+
+            {/* Logout button */}
+            {isLoggedIn && onLogout && (
+              <button
+                onClick={onLogout}
+                className="p-1.5 sm:px-2 sm:py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
+                title="Kijelentkezés a fiókból"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Kilépés</span>
               </button>
             )}
           </div>
