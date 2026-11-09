@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Award, Printer, RotateCcw, CheckCircle2, AlertCircle, Sparkles, Star } from 'lucide-react';
 import { Badge } from '../types/game';
+import { getAssetUrl } from '../utils/assets';
 
 interface SummaryCertificateProps {
   studentName: string;
@@ -164,7 +165,7 @@ export function SummaryCertificate({
         <div className="p-5 rounded-xl border border-blue-300 bg-gradient-to-r from-blue-900 to-blue-950 text-white flex flex-col sm:flex-row items-center gap-5">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-400 shrink-0 shadow-md bg-amber-100">
             <img
-              src="/assets/aistudio/manager_bernardo_26cd4c18.png"
+              src={getAssetUrl('/assets/aistudio/manager_bernardo_26cd4c18.png')}
               alt="Manager Bernardo"
               className="w-full h-full object-cover object-top"
             />

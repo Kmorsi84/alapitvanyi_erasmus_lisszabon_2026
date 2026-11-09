@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Utensils, Coffee, Wine, Sparkles } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 interface FoodImageProps {
   src: string;
@@ -87,7 +88,7 @@ export function FoodImage({
         </div>
       )}
       <img
-        src={src}
+        src={getAssetUrl(src)}
         alt={alt}
         loading="lazy"
         decoding="async"

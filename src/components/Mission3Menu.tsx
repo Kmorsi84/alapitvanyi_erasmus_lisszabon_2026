@@ -3,6 +3,7 @@ import { Utensils, AlertCircle, CheckCircle2, ArrowRight, Sparkles, ShieldAlert,
 import { RESTAURANT_MENU, MENU_QUESTS } from '../data/menu';
 import { FoodImage } from './FoodImage';
 import { ManagerDialogue } from './ManagerDialogue';
+import { getAssetUrl } from '../utils/assets';
 
 interface Mission3Props {
   onComplete: (score: number) => void;
@@ -166,7 +167,7 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
             <div className="w-12 h-12 rounded-full bg-white shadow-xs border border-amber-300 flex items-center justify-center text-2xl shrink-0 overflow-hidden">
               {currentQuest.avatarUrl ? (
                 <img
-                  src={currentQuest.avatarUrl}
+                  src={getAssetUrl(currentQuest.avatarUrl)}
                   alt={currentQuest.guestName}
                   className="w-full h-full object-cover object-top"
                 />

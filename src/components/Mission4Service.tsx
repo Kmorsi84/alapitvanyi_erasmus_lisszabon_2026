@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { MessageSquare, CheckCircle2, AlertCircle, ArrowRight, Sparkles, Smile, Frown, HelpCircle, Heart } from 'lucide-react';
 import { SERVICE_SCENARIOS } from '../data/service';
 import { ManagerDialogue } from './ManagerDialogue';
+import { getAssetUrl } from '../utils/assets';
 
 interface Mission4Props {
   onComplete: (score: number) => void;
@@ -123,7 +124,7 @@ export function Mission4Service({ onComplete, onRecordMistake }: Mission4Props) 
               >
                 {currentScenario.avatarUrl ? (
                   <img
-                    src={currentScenario.avatarUrl}
+                    src={getAssetUrl(currentScenario.avatarUrl)}
                     alt={currentScenario.customerName}
                     className="w-full h-full object-cover object-top"
                   />

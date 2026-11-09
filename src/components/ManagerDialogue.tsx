@@ -1,4 +1,5 @@
 import { MessageSquare, Sparkles } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 interface ManagerDialogueProps {
   message: string;
@@ -22,7 +23,7 @@ export function ManagerDialogue({
         <div className="relative shrink-0">
           <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-900 shadow-sm bg-blue-100 flex items-center justify-center">
             <img
-              src="/assets/aistudio/manager_bernardo_26cd4c18.png"
+              src={getAssetUrl('/assets/aistudio/manager_bernardo_26cd4c18.png')}
               alt="Manager Bernardo"
               className="w-full h-full object-cover object-top"
             />

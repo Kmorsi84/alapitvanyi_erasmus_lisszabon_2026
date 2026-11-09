@@ -42,6 +42,7 @@ jobs:
 
       - name: Build application
         env:
+          VITE_BASE_PATH: '/alapitvanyi_erasmus_lisszabon_2026/'
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://xgdogmcqktqcqgqrxpxt.supabase.co' }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY || '' }}
         run: npm run build

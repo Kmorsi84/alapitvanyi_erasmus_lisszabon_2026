@@ -3,6 +3,7 @@ import { ShoppingBasket, Check, AlertTriangle, ArrowRight, Sparkles, ChefHat, Tr
 import { MARKET_INGREDIENTS, RECIPE_CHALLENGES } from '../data/market';
 import { FoodImage } from './FoodImage';
 import { ManagerDialogue } from './ManagerDialogue';
+import { getAssetUrl } from '../utils/assets';
 
 interface Mission2Props {
   onComplete: (score: number) => void;
@@ -133,7 +134,7 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
             <div className="flex items-center gap-3">
               <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-emerald-400 shadow-md overflow-hidden shrink-0 bg-emerald-100">
                 <img
-                  src="/assets/aistudio/chef_marco_portrait.jpg"
+                  src={getAssetUrl('/assets/aistudio/chef_marco_portrait.jpg')}
                   alt="Chef Marco"
                   className="w-full h-full object-cover object-top"
                 />

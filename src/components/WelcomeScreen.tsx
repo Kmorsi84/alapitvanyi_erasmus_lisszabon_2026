@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import { ChefHat, Compass, Sparkles, UtensilsCrossed, ShieldCheck, ArrowRight } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
 interface WelcomeScreenProps {
   onStart: (name: string) => void;
@@ -50,7 +51,7 @@ export function WelcomeScreen({ onStart, defaultName = '' }: WelcomeScreenProps)
           <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3.5 sm:gap-4">
             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-amber-600 shrink-0 shadow-sm bg-amber-100">
               <img
-                src="/assets/aistudio/manager_bernardo_26cd4c18.png"
+                src={getAssetUrl('/assets/aistudio/manager_bernardo_26cd4c18.png')}
                 alt="Manager Bernardo"
                 className="w-full h-full object-cover object-top"
               />
