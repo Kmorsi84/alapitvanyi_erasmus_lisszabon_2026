@@ -20,7 +20,7 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
   }, []);
 
   const [activeTab, setActiveTab] = useState<'all' | 'starter' | 'soup' | 'main' | 'dessert' | 'drink'>('all');
-  const [mobileTab, setMobileTab] = useState<'both' | 'inquiry' | 'menu'>('both');
+  const [mobileTab, setMobileTab] = useState<'both' | 'inquiry' | 'menu'>('inquiry');
   const [currentQuestIndex, setCurrentQuestIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, { isCorrect: boolean; explanation: string }>>({});
@@ -349,19 +349,14 @@ export function Mission3Menu({ onComplete, onRecordMistake }: Mission3Props) {
             </div>
           </div>
 
-          {/* Menu Items List - No nested scroll trap on mobile, smooth isolated clipping on all devices */}
-          <div className="p-4 sm:p-5 space-y-4 lg:max-h-[680px] lg:overflow-y-auto overflow-visible touch-scroll">
+          {/* Menu Items List */}
+          <div className="p-4 sm:p-5 space-y-4 lg:max-h-[680px] lg:overflow-y-auto">
             {filteredMenuItems.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-slate-50/50 hover:bg-white transition-colors duration-150 shadow-2xs relative isolate"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-slate-50/50 hover:bg-white transition-colors duration-150 shadow-2xs relative"
               >
-                <div
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100 isolate clip-fix"
-                  style={{
-                    WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-                  }}
-                >
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100">
                   <FoodImage
                     src={item.imageUrl}
                     alt={item.portugueseName}

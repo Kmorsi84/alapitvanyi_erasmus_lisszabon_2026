@@ -122,7 +122,7 @@ export function Mission1Vocabulary({ onComplete, soundEnabled }: Mission1Props) 
                   /* FRONT OF CARD */
                   <div className="flex flex-col h-full overflow-hidden rounded-xl">
                     {/* Realistic Food Photography */}
-                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-100 isolate clip-fix">
+                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-100">
                       <FoodImage
                         src={dish.imageUrl}
                         alt={dish.portugueseName}

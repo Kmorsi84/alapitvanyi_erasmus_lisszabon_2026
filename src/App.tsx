@@ -361,7 +361,7 @@ export default function App() {
     if (isLoggedIn && currentStudent && isSupabaseConfigured()) {
       setIsSaving(true);
       try {
-        const res = await queueSaveMissionResult(missionId, cappedScore, true);
+        const res = await queueSaveMissionResult(missionId, cappedScore, true, currentStudent.id);
         if (!res.success) {
           setSaveErrorNotice(
             `Figyelem: A(z) ${missionId}. küldetés pontszáma helyileg rögzítve lett, de a Supabase felhőbe mentés meghiúsult: ${res.error}`

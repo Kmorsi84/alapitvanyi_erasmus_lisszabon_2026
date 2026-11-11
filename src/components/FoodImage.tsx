@@ -72,16 +72,7 @@ export function FoodImage({
   }
 
   return (
-    <div
-      className={`relative overflow-hidden bg-slate-100 isolate ${className}`}
-      style={{
-        WebkitBackfaceVisibility: 'hidden',
-        backfaceVisibility: 'hidden',
-        WebkitTransform: 'translate3d(0, 0, 0)',
-        transform: 'translate3d(0, 0, 0)',
-        WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-      }}
-    >
+    <div className={`relative overflow-hidden bg-slate-100 ${className}`}>
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
           <Utensils className="w-6 h-6 text-slate-300" />

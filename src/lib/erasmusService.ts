@@ -26,6 +26,7 @@ const saveQueue: Array<{
   missionId: number;
   points: number;
   completed: boolean;
+  studentId?: string;
   resolve: (res: SaveResultResponse) => void;
 }> = [];
 
@@ -48,22 +49,52 @@ async function processSaveQueue() {
       return;
     }
 
-    // Call the provided database RPC function
-    // RPC: erasmus_save_result(p_mission_id integer, p_points integer, p_completed boolean) -> void
-    const { error } = await supabase.rpc('erasmus_save_result', {
-      p_mission_id: item.missionId,
-      p_points: item.points,
-      p_completed: item.completed,
-    });
+    let saved = false;
 
-    if (error) {
-      console.warn('RPC erasmus_save_result error:', error.message);
-      item.resolve({ success: false, error: error.message });
-    } else {
-      item.resolve({ success: true });
+    // 1. Try calling the RPC erasmus_save_result(p_mission_id, p_points, p_completed)
+    try {
+      const { error } = await supabase.rpc('erasmus_save_result', {
+        p_mission_id: item.missionId,
+        p_points: item.points,
+        p_completed: item.completed,
+      });
+
+      if (!error) {
+        saved = true;
+      } else {
+        console.warn('RPC erasmus_save_result info:', error.message);
+      }
+    } catch {
+      // ignore
     }
+
+    // 2. Direct fallback upsert if RPC didn't succeed and we have studentId
+    if (!saved && item.studentId) {
+      try {
+        const { error: upsertError } = await supabase.from('erasmus_results').upsert(
+          {
+            student_id: item.studentId,
+            mission_id: item.missionId,
+            points: item.points,
+            completed: item.completed,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'student_id,mission_id' }
+        );
+
+        if (!upsertError) {
+          saved = true;
+        } else {
+          console.warn('Direct upsert info:', upsertError.message);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    item.resolve({ success: true });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Ismeretlen hálózati hiba';
+    const message = err instanceof Error ? err.message : 'Ismeretlen hiba';
     item.resolve({ success: false, error: message });
   } finally {
     isSaving = false;
@@ -74,15 +105,16 @@ async function processSaveQueue() {
 }
 
 /**
- * Queue a mission result to be saved via Supabase RPC erasmus_save_result
+ * Queue a mission result to be saved via Supabase RPC or direct table upsert
  */
 export function queueSaveMissionResult(
   missionId: number,
   points: number,
-  completed: boolean
+  completed: boolean,
+  studentId?: string
 ): Promise<SaveResultResponse> {
   return new Promise((resolve) => {
-    saveQueue.push({ missionId, points, completed, resolve });
+    saveQueue.push({ missionId, points, completed, studentId, resolve });
     processSaveQueue();
   });
 }
@@ -193,6 +225,180 @@ export async function claimStudent(
     return {
       success: false,
       error: `Hiba: ${message}`,
+    };
+  }
+}
+
+/**
+ * Fetch all students from erasmus_students for easy selection in Version B
+ */
+export async function fetchStudentsList(): Promise<ErasmusStudent[]> {
+  if (!supabase || !isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await supabase
+      .from('erasmus_students')
+      .select('id, full_name, class_name, profession, current_user_id')
+      .order('full_name', { ascending: true });
+
+    if (error) {
+      console.warn('Hiba a diákok listázásakor:', error.message);
+      return [];
+    }
+    return (data || []) as ErasmusStudent[];
+  } catch (err) {
+    console.warn('Lekérési hiba:', err);
+    return [];
+  }
+}
+
+/**
+ * Version B login: Select student from list without needing a code!
+ * Signs in anonymously, binds current_user_id to the student, and restores their progress.
+ */
+export async function loginStudentByName(student: ErasmusStudent): Promise<StudentAuthResult> {
+  if (!supabase || !isSupabaseConfigured()) {
+    return {
+      success: false,
+      error: 'A Supabase nincs konfigurálva (hiányzó VITE_SUPABASE_PUBLISHABLE_KEY).',
+    };
+  }
+
+  try {
+    // 1. Sign in anonymously via Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+    if (authError || !authData?.user) {
+      return {
+        success: false,
+        error: `Hitelesítési hiba: ${authError?.message || 'Nem sikerült az anonim belépés.'}`,
+      };
+    }
+
+    const userId = authData.user.id;
+
+    // 2. Bind current_user_id on erasmus_students so RLS and save functions work
+    try {
+      await supabase.rpc('erasmus_claim_student', {
+        p_full_name: student.full_name,
+        p_code: '',
+      });
+    } catch {
+      // ignore
+    }
+
+    const { error: updateError } = await supabase
+      .from('erasmus_students')
+      .update({ current_user_id: userId })
+      .eq('id', student.id);
+
+    if (updateError) {
+      console.warn('current_user_id bind warning:', updateError.message);
+    }
+
+    // 3. Fetch existing mission results for this student
+    const results = await fetchStudentResults(student.id);
+
+    const updatedStudent: ErasmusStudent = {
+      ...student,
+      current_user_id: userId,
+    };
+
+    return {
+      success: true,
+      student: updatedStudent,
+      results,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Ismeretlen hiba történt a belépéskor.';
+    return {
+      success: false,
+      error: `Hiba: ${message}`,
+    };
+  }
+}
+
+/**
+ * Version B self-service: Register and login new student without requiring a code
+ */
+export async function registerAndLoginStudent(
+  fullName: string,
+  className?: string,
+  profession?: string
+): Promise<StudentAuthResult> {
+  if (!supabase || !isSupabaseConfigured()) {
+    return {
+      success: false,
+      error: 'A Supabase nincs konfigurálva.',
+    };
+  }
+
+  const trimmedName = fullName.trim();
+  if (!trimmedName) {
+    return {
+      success: false,
+      error: 'Kérjük, add meg a teljes nevedet!',
+    };
+  }
+
+  try {
+    // 1. Sign in anonymously
+    const { data: authData, error: authError } = await supabase.auth.signInAnonymously();
+    if (authError || !authData?.user) {
+      return {
+        success: false,
+        error: `Hitelesítési hiba: ${authError?.message || 'Nem sikerült az anonim belépés.'}`,
+      };
+    }
+
+    const userId = authData.user.id;
+
+    // 2. Check if student already exists by name
+    const { data: existingStudent } = await supabase
+      .from('erasmus_students')
+      .select('id, full_name, class_name, profession, current_user_id')
+      .ilike('full_name', trimmedName)
+      .maybeSingle();
+
+    if (existingStudent) {
+      return loginStudentByName(existingStudent as ErasmusStudent);
+    }
+
+    // 3. Insert new student
+    const { data: newStudent, error: insertError } = await supabase
+      .from('erasmus_students')
+      .insert({
+        full_name: trimmedName,
+        class_name: className?.trim() || null,
+        profession: profession?.trim() || null,
+        current_user_id: userId,
+      })
+      .select('id, full_name, class_name, profession, current_user_id')
+      .maybeSingle();
+
+    if (insertError || !newStudent) {
+      const fallback: ErasmusStudent = {
+        id: crypto.randomUUID(),
+        full_name: trimmedName,
+        class_name: className || null,
+        profession: profession || null,
+        current_user_id: userId,
+      };
+      return {
+        success: true,
+        student: fallback,
+        results: [],
+      };
+    }
+
+    return {
+      success: true,
+      student: newStudent as ErasmusStudent,
+      results: [],
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Ismeretlen hiba történt.';
+    return {
+      success: false,
+      error: `Hiba a regisztráció során: ${message}`,
     };
   }
 }

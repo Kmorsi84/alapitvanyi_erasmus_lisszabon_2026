@@ -171,7 +171,7 @@ export function Mission5Final({ onComplete, soundEnabled }: Mission5Props) {
                   <div
                     key={`photo-${dish.id}`}
                     onClick={() => handleSelectPhoto(dish.id)}
-                    className={`relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all h-20 sm:h-28 isolate clip-fix ${
+                    className={`relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all h-20 sm:h-28 ${
                       isMatched
                         ? 'border-emerald-500 opacity-60 cursor-default ring-2 ring-emerald-300'
                         : isSelected

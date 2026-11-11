@@ -331,7 +331,7 @@ export function Mission2Market({ onComplete, onRecordMistake }: Mission2Props) {
                   }
                 }}
               >
-                <div className="relative h-24 w-full rounded-lg overflow-hidden mb-2 bg-slate-100 isolate clip-fix">
+                <div className="relative h-24 w-full rounded-lg overflow-hidden mb-2 bg-slate-100">
                   <FoodImage
                     src={item.imageUrl}
                     alt={item.name}

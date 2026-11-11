@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Sparkles,
-  Lock,
   User,
-  Eye,
-  EyeOff,
   LogIn,
   AlertTriangle,
   GraduationCap,
-  ShieldAlert,
   Loader2,
   Compass,
+  UserPlus,
+  Users,
+  CheckCircle2,
+  BookOpen,
 } from 'lucide-react';
-import { claimStudent } from '../lib/erasmusService';
+import {
+  fetchStudentsList,
+  loginStudentByName,
+  registerAndLoginStudent,
+} from '../lib/erasmusService';
 import { isSupabaseConfigured, ErasmusStudent, ErasmusResult } from '../lib/supabase';
 
 interface StudentLoginProps {
@@ -26,54 +30,114 @@ export function StudentLogin({
   onOpenTeacherLogin,
   onContinueAsGuest,
 }: StudentLoginProps) {
-  const [fullName, setFullName] = useState('');
-  const [studentCode, setStudentCode] = useState('');
-  const [showCode, setShowCode] = useState(false);
+  const [students, setStudents] = useState<ErasmusStudent[]>([]);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(true);
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+
+  // Mode: 'pick' (select from roster) or 'new' (enter name)
+  const [mode, setMode] = useState<'pick' | 'new'>('pick');
+
+  // New student form
+  const [newFullName, setNewFullName] = useState('');
+  const [newClass, setNewClass] = useState('');
+  const [newProfession, setNewProfession] = useState('Szakács');
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isConfigured = isSupabaseConfigured();
 
+  // Load existing student roster
+  useEffect(() => {
+    let isMounted = true;
+    async function loadRoster() {
+      if (!isConfigured) {
+        setIsLoadingStudents(false);
+        setMode('new');
+        return;
+      }
+
+      setIsLoadingStudents(true);
+      try {
+        const list = await fetchStudentsList();
+        if (isMounted) {
+          setStudents(list);
+          if (list.length > 0) {
+            setSelectedStudentId(list[0].id);
+            setMode('pick');
+          } else {
+            setMode('new');
+          }
+        }
+      } catch {
+        if (isMounted) setMode('new');
+      } finally {
+        if (isMounted) setIsLoadingStudents(false);
+      }
+    }
+
+    loadRoster();
+    return () => {
+      isMounted = false;
+    };
+  }, [isConfigured]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    const trimmedName = fullName.trim();
-    const trimmedCode = studentCode.trim();
-
-    if (!trimmedName || !trimmedCode) {
-      setErrorMessage('Kérjük, töltsd ki a teljes nevedet és az egyedi tanulói kódot is!');
-      return;
-    }
-
     if (!isConfigured) {
-      setErrorMessage(
-        'A Supabase környezeti változók (VITE_SUPABASE_PUBLISHABLE_KEY) nincsenek beállítva. A felhőalapú mentéshez konfiguráció szükséges.'
-      );
+      // Fallback guest mode if Supabase is not configured yet
+      const fallbackName =
+        mode === 'pick'
+          ? students.find((s) => s.id === selectedStudentId)?.full_name || 'Tanuló'
+          : newFullName.trim() || 'Tanuló';
+      onContinueAsGuest?.(fallbackName);
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Security rule: The code is passed only to claimStudent and never written to localStorage/sessionStorage
-      const result = await claimStudent(trimmedName, trimmedCode);
+      if (mode === 'pick') {
+        const student = students.find((s) => s.id === selectedStudentId);
+        if (!student) {
+          setErrorMessage('Kérjük, válaszd ki a neved a listából!');
+          setIsLoading(false);
+          return;
+        }
 
-      if (!result.success || !result.student) {
-        setErrorMessage(
-          result.error ||
-            'Érvénytelen tanulói név vagy kód. Kérjük, ellenőrizd az adataidat és próbáld újra!'
-        );
+        const result = await loginStudentByName(student);
+        if (!result.success || !result.student) {
+          setErrorMessage(result.error || 'Nem sikerült a belépés. Próbáld újra!');
+        } else {
+          onLoginSuccess(result.student, result.results || []);
+        }
       } else {
-        onLoginSuccess(result.student, result.results || []);
+        // Mode 'new'
+        const trimmed = newFullName.trim();
+        if (!trimmed) {
+          setErrorMessage('Kérjük, add meg a teljes nevedet!');
+          setIsLoading(false);
+          return;
+        }
+
+        const result = await registerAndLoginStudent(trimmed, newClass, newProfession);
+        if (!result.success || !result.student) {
+          setErrorMessage(result.error || 'Hiba történt a regisztráció során.');
+        } else {
+          onLoginSuccess(result.student, result.results || []);
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Ismeretlen hiba történt.';
-      setErrorMessage(`Hiba a bejelentkezés során: ${msg}`);
+      setErrorMessage(`Hiba: ${msg}`);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const selectedStudent = students.find((s) => s.id === selectedStudentId);
 
   return (
     <div className="relative min-h-[calc(100vh-100px)] flex flex-col items-center justify-center py-8 px-4 sm:px-6">
@@ -86,113 +150,201 @@ export function StudentLogin({
         <div className="h-3 w-full bg-gradient-to-r from-blue-900 via-sky-500 via-amber-400 to-emerald-600" />
 
         <div className="p-6 sm:p-8 space-y-6">
-          {/* Header & Badges */}
-          <div className="text-center space-y-2.5">
+          {/* Header */}
+          <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Erasmus+ Lisszabon · Tanulói Belépés
+              Erasmus+ Lisszabon · Tanulói Belépés (Kód Nélkül)
             </div>
 
             <h1 className="font-serif-lisbon font-bold text-2xl sm:text-3xl text-blue-950 tracking-tight">
               Portuguese Food Quest
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-              Lisszaboni éttermi szakmai kaland és gasztronómiai angol (B1) szakképzési kihívás.
-              Lépj be az iskoládtól kapott neveddel és egyedi kódoddal a pontjaid mentéséhez!
+              Válaszd ki a nevedet a mobilitási névsorból a pontjaid és jelvényeid automatikus felhőbe mentéséhez!
             </p>
           </div>
+
+          {/* Mode Switcher Tabs (ha vannak diákok az adatbázisban) */}
+          {students.length > 0 && (
+            <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setMode('pick')}
+                className={`py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  mode === 'pick'
+                    ? 'bg-white text-blue-950 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Users className="w-4 h-4 text-blue-800" />
+                <span>Névsorból választok ({students.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMode('new')}
+                className={`py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  mode === 'new'
+                    ? 'bg-white text-blue-950 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <UserPlus className="w-4 h-4 text-emerald-700" />
+                <span>Új tanulóként lépek be</span>
+              </button>
+            </div>
+          )}
 
           {/* Error Banner */}
           {errorMessage && (
             <div
               role="alert"
-              className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-900 text-xs sm:text-sm flex items-start gap-2.5 animate-shake"
+              className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-900 text-xs sm:text-sm flex items-start gap-2.5"
             >
               <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-semibold">Sikertelen azonosítás</p>
+                <p className="font-semibold">Hiba történt</p>
                 <p className="mt-0.5 text-red-800">{errorMessage}</p>
               </div>
             </div>
           )}
 
-          {/* Student Login Form */}
+          {/* Student Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name Field */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="student-full-name"
-                className="block text-xs font-bold text-slate-700 uppercase tracking-wide"
-              >
-                Tanuló teljes neve
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <User className="w-4 h-4" />
+            {mode === 'pick' && students.length > 0 ? (
+              /* PICK FROM ROSTER */
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="student-select"
+                    className="block text-xs font-bold text-slate-700 uppercase tracking-wide"
+                  >
+                    Válaszd ki a neved a névsorból:
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <User className="w-4 h-4 text-blue-800" />
+                    </div>
+                    <select
+                      id="student-select"
+                      value={selectedStudentId}
+                      onChange={(e) => setSelectedStudentId(e.target.value)}
+                      disabled={isLoading || isLoadingStudents}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-600 text-slate-900 font-semibold bg-white text-sm cursor-pointer shadow-2xs"
+                    >
+                      {students.map((st) => (
+                        <option key={st.id} value={st.id}>
+                          {st.full_name} {st.class_name ? `(${st.class_name}` : ''}
+                          {st.profession ? ` · ${st.profession})` : st.class_name ? ')' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <input
-                  id="student-full-name"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="pl. Kovács András"
-                  autoComplete="name"
-                  required
-                  disabled={isLoading}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-transparent text-slate-900 font-medium placeholder:text-slate-400 bg-white text-sm"
-                />
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Pontosan úgy írd be a neved, ahogyan a tanárodtól a felkészítő listán kaptad.
-              </p>
-            </div>
 
-            {/* Unique Student Code Field */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="student-code"
-                className="block text-xs font-bold text-slate-700 uppercase tracking-wide"
-              >
-                Egyedi tanulói kód
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
+                {/* Selected Student Highlight Card */}
+                {selectedStudent && (
+                  <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <span className="font-bold text-blue-950 block">
+                          {selectedStudent.full_name}
+                        </span>
+                        <span className="text-slate-500 text-[11px]">
+                          {[selectedStudent.class_name, selectedStudent.profession]
+                            .filter(Boolean)
+                            .join(' · ') || 'Mobilitási résztvevő'}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-semibold text-blue-900 bg-white px-2 py-0.5 rounded border border-blue-200">
+                      Kész a belépésre
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* ENTER NEW STUDENT */
+              <div className="space-y-3.5">
+                <div className="space-y-1">
+                  <label
+                    htmlFor="student-new-name"
+                    className="block text-xs font-bold text-slate-700 uppercase tracking-wide"
+                  >
+                    Tanuló teljes neve *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <input
+                      id="student-new-name"
+                      type="text"
+                      value={newFullName}
+                      onChange={(e) => setNewFullName(e.target.value)}
+                      placeholder="pl. Kiss Dóra vagy Tóth Bence"
+                      required
+                      disabled={isLoading}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-600 text-slate-900 font-medium placeholder:text-slate-400 bg-white text-sm"
+                    />
+                  </div>
                 </div>
-                <input
-                  id="student-code"
-                  type={showCode ? 'text' : 'password'}
-                  value={studentCode}
-                  onChange={(e) => setStudentCode(e.target.value)}
-                  placeholder="pl. LIS2026-X8Y2"
-                  autoComplete="off"
-                  required
-                  disabled={isLoading}
-                  className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-transparent text-slate-900 font-medium placeholder:text-slate-400 bg-white text-sm font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCode(!showCode)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
-                  title={showCode ? 'Kód elrejtése' : 'Kód mutatása'}
-                  aria-label={showCode ? 'Kód elrejtése' : 'Kód mutatása'}
-                >
-                  {showCode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500">
-                A kódod nem kerül mentésre a böngésző helyi tárhelyébe (localStorage).
-              </p>
-            </div>
 
-            {/* Submit Button */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="student-new-class"
+                      className="block text-xs font-bold text-slate-700 uppercase tracking-wide"
+                    >
+                      Osztály (opcionális)
+                    </label>
+                    <input
+                      id="student-new-class"
+                      type="text"
+                      value={newClass}
+                      onChange={(e) => setNewClass(e.target.value)}
+                      placeholder="pl. 11.A vagy 12.B"
+                      disabled={isLoading}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-600 text-slate-900 text-sm bg-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="student-new-prof"
+                      className="block text-xs font-bold text-slate-700 uppercase tracking-wide"
+                    >
+                      Szakma
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="student-new-prof"
+                        value={newProfession}
+                        onChange={(e) => setNewProfession(e.target.value)}
+                        disabled={isLoading}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white cursor-pointer"
+                      >
+                        <option value="Szakács">Szakács</option>
+                        <option value="Cukrász">Cukrász</option>
+                        <option value="Vendégtéri szakember (Pincér)">Vendégtéri szakember (Pincér)</option>
+                        <option value="Turisztikai technikus">Turisztikai technikus</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Big Action Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-xl font-serif-lisbon font-bold text-sm sm:text-base text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 ${
+              disabled={isLoading || (mode === 'pick' && students.length === 0 && isLoadingStudents)}
+              className={`w-full py-3.5 px-4 rounded-xl font-serif-lisbon font-bold text-sm sm:text-base text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 ${
                 isLoading
                   ? 'bg-blue-800/80 cursor-wait'
-                  : 'bg-gradient-to-r from-blue-900 to-blue-700 hover:from-blue-800 hover:to-blue-600'
+                  : 'bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 hover:from-blue-800 hover:to-blue-700'
               }`}
             >
               {isLoading ? (
@@ -209,17 +361,12 @@ export function StudentLogin({
             </button>
           </form>
 
-          {/* Security & Brute-Force Protection Notice */}
-          <div className="rounded-xl bg-slate-50 border border-slate-200/90 p-3.5 text-slate-600 text-[11px] space-y-1">
-            <div className="flex items-center gap-1.5 font-bold text-slate-800">
-              <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Biztonsági és védelmi tájékoztató:</span>
-            </div>
-            <p className="leading-relaxed">
-              Az azonosítás során a kliensoldal automatikus késleltetést alkalmaz sikertelen próbálkozásnál,
-              és törli az ideiglenes munkamenetet. A valódi, teljes körű brute-force védelemhez szerveroldali
-              IP-alapú rate limit (kérésszám-korlátozás) és CAPTCHA ellenőrzés szükséges a Supabase infrastruktúrában.
-            </p>
+          {/* Simple Info note */}
+          <div className="rounded-xl bg-slate-50 border border-slate-200/90 p-3 text-slate-600 text-xs flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-blue-700 shrink-0" />
+            <span>
+              A belépéshez nincs szükség külön jelszóra vagy kódra. A pontjaid automatikusan a nevedhez mentődnek.
+            </span>
           </div>
 
           {/* Teacher Login Link & Guest Mode */}
@@ -236,12 +383,18 @@ export function StudentLogin({
             {onContinueAsGuest && (
               <button
                 type="button"
-                onClick={() => onContinueAsGuest(fullName.trim() || 'Vendég Tanuló')}
+                onClick={() =>
+                  onContinueAsGuest(
+                    mode === 'pick'
+                      ? selectedStudent?.full_name || 'Vendég Tanuló'
+                      : newFullName.trim() || 'Vendég Tanuló'
+                  )
+                }
                 className="text-slate-500 hover:text-slate-800 cursor-pointer flex items-center gap-1"
-                title="Játék indítása vendégként, Supabase mentés nélkül"
+                title="Játék indítása vendégként, felhő mentés nélkül"
               >
                 <Compass className="w-3.5 h-3.5" />
-                <span>Folytatás helyi vendég módban</span>
+                <span>Folytatás helyi vendégként</span>
               </button>
             )}
           </div>
