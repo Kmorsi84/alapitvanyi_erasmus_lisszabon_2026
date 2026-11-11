@@ -3,7 +3,7 @@ import { Navbar } from './components/Navbar';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { StudentLogin } from './components/StudentLogin';
 import { TeacherLoginModal } from './components/TeacherLoginModal';
-import { TeacherDashboard } from './components/TeacherDashboard';
+import { CoordinatorDashboard } from './components/CoordinatorDashboard';
 import { SupabaseConfigBanner } from './components/SupabaseConfigBanner';
 import { Mission1Vocabulary } from './components/Mission1Vocabulary';
 import { Mission2Market } from './components/Mission2Market';
@@ -502,9 +502,9 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
-        {/* If Teacher Dashboard is active */}
+        {/* If Coordinator / Teacher Dashboard is active */}
         {isTeacher && isTeacherViewActive ? (
-          <TeacherDashboard
+          <CoordinatorDashboard
             onLogout={handleLogout}
             onReturnToGame={() => setIsTeacherViewActive(false)}
           />

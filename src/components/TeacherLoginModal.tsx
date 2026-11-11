@@ -82,10 +82,10 @@ export function TeacherLoginModal({ isOpen, onClose, onLoginSuccess }: TeacherLo
               </div>
               <div>
                 <h2 className="font-serif-lisbon font-bold text-lg text-blue-950">
-                  Tanári Eredménykövető
+                  Koordinátori & Tanári Belépés
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Supabase Auth tanári fiók azonosítás
+                  Supabase Auth koordinátori és tanári azonosítás
                 </p>
               </div>
             </div>
@@ -203,7 +203,7 @@ export function TeacherLoginModal({ isOpen, onClose, onLoginSuccess }: TeacherLo
                 ) : (
                   <>
                     <LogIn className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Tanári Belépés</span>
+                    <span>Belépés a Vezérlőpultra</span>
                   </>
                 )}
               </button>

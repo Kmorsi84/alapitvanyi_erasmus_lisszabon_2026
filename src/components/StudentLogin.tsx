@@ -230,7 +230,7 @@ export function StudentLogin({
               className="inline-flex items-center gap-1.5 text-blue-900 hover:text-blue-700 font-semibold cursor-pointer underline decoration-blue-300 hover:decoration-blue-700 transition-colors"
             >
               <GraduationCap className="w-4 h-4 text-amber-600" />
-              <span>Tanári belépés / Eredménykövető</span>
+              <span>Koordinátori & Tanári Belépés</span>
             </button>
 
             {onContinueAsGuest && (

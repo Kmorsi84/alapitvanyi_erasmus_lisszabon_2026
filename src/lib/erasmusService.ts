@@ -378,3 +378,62 @@ export async function logoutUser(): Promise<void> {
     }
   }
 }
+
+/**
+ * Reset a student's session binding so they can re-login on a new device or browser
+ */
+export async function resetStudentSession(studentId: string): Promise<{ success: boolean; error?: string }> {
+  if (!supabase || !isSupabaseConfigured()) {
+    return { success: false, error: 'A Supabase nincs konfigurálva.' };
+  }
+
+  try {
+    const { error } = await supabase
+      .from('erasmus_students')
+      .update({ current_user_id: null })
+      .eq('id', studentId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Ismeretlen hiba';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Add a new student to erasmus_students (for coordinator)
+ */
+export async function addStudentByCoordinator(
+  fullName: string,
+  className?: string,
+  profession?: string
+): Promise<{ success: boolean; student?: ErasmusStudent; error?: string }> {
+  if (!supabase || !isSupabaseConfigured()) {
+    return { success: false, error: 'A Supabase nincs konfigurálva.' };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('erasmus_students')
+      .insert({
+        full_name: fullName.trim(),
+        class_name: className?.trim() || null,
+        profession: profession?.trim() || null,
+        current_user_id: null,
+      })
+      .select('id, full_name, class_name, profession, current_user_id')
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, student: data as ErasmusStudent };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Ismeretlen hiba';
+    return { success: false, error: msg };
+  }
+}
+

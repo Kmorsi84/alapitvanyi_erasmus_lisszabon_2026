@@ -181,24 +181,24 @@ export function Navbar({
               )}
             </button>
 
-            {/* Teacher button */}
+            {/* Coordinator & Teacher button */}
             {isTeacher ? (
               <button
                 onClick={onToggleTeacherView}
                 className="px-2 py-1 text-xs font-semibold bg-amber-100 text-amber-950 hover:bg-amber-200 border border-amber-300 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                title="Tanári felület megnyitása"
+                title="Koordinátori & Tanári Központ megnyitása"
               >
                 <GraduationCap className="w-3.5 h-3.5 text-amber-800" />
-                <span className="hidden sm:inline">Tanári Nézet</span>
+                <span className="hidden sm:inline">Koordinátori Központ</span>
               </button>
             ) : onOpenTeacherLogin ? (
               <button
                 onClick={onOpenTeacherLogin}
                 className="p-1.5 sm:px-2 sm:py-1 text-xs font-medium text-blue-950 hover:bg-blue-50 border border-blue-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                title="Tanári belépés"
+                title="Koordinátori & Tanári belépés"
               >
                 <GraduationCap className="w-3.5 h-3.5 text-blue-800" />
-                <span className="hidden lg:inline">Tanár</span>
+                <span className="hidden lg:inline">Koordinátor</span>
               </button>
             ) : null}
 
